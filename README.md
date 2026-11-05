@@ -1,4 +1,4 @@
-# ⚡ Pokémon Explorer — Mini-Projet 2
+# Pokémon Explorer — Mini-Projet 2
 
 Ce projet est une application Python qui utilise **PokéAPI** pour récupérer des informations sur les Pokémon.
 
