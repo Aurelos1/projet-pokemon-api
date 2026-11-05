@@ -14,6 +14,8 @@ st.set_page_config(
 )
 
 
+# Mise en cache des calculs pendant une heure
+
 @st.cache_data(ttl=3600)
 def analyser_hp_en_cache(noms):
     return calculer_moyenne_hp(noms)
@@ -120,6 +122,8 @@ with onglet_comparaison:
                         if image2:
                             st.image(image2)
 
+                    # Transformation des statistiques JSON en dictionnaire
+                    # Exemple : {"hp": 35, "attack": 55, ...}
                     stats1 = {
                         s["stat"]["name"]: s["base_stat"]
                         for s in p1["stats"]
@@ -131,6 +135,7 @@ with onglet_comparaison:
                     }
 
                     tableau = []
+                    # Comparaison des statistiques pour identifier le meilleur Pokémon
 
                     for stat, valeur1 in stats1.items():
                         valeur2 = stats2[stat]
@@ -214,8 +219,8 @@ with onglet_types:
 
             st.write("### 📊 Moyenne des HP")
 
-            # Limitation temporaire pour accélérer le calcul
-            noms_a_analyser = tuple(noms[:5])
+            
+            noms_a_analyser = tuple(noms[20])
 
             with st.spinner("Calcul des HP en cours..."):
                 moyenne, nombre = analyser_hp_en_cache(
@@ -284,6 +289,7 @@ with onglet_combat:
                         s["stat"]["name"]: s["base_stat"]
                         for s in p2["stats"]
                     }
+                    # Calcul simplifié des dégâts selon l'attaque et la défense adverse
 
                     degats1 = max(
                         1,
@@ -305,6 +311,7 @@ with onglet_combat:
                     total2 = 0
                     tours = []
 
+                    # Simulation de cinq tours et cumul des dégâts
                     for tour in range(1, 6):
                         total1 += degats1
                         total2 += degats2

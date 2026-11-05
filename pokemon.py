@@ -1,7 +1,6 @@
 
 import time
 import requests
-from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -13,7 +12,8 @@ DUREE_CACHE = 3600
 def requete_api(url, max_tentatives=2):
     maintenant = time.time()
 
-    # Vérifier si la réponse est déjà en cache
+    # Vérifier si la réponse est déjà en cache, si expiré, les supprimes
+    #evite de refaire les memes requetes et rend la tache plus rapide
     if url in cache:
         donnees, expiration = cache[url]
 
@@ -23,6 +23,8 @@ def requete_api(url, max_tentatives=2):
         del cache[url]
 
     # Appel API avec tentatives automatiques
+    #Cette boucle permet de réessayer une requête HTTP. Avec max_tentatives=2, elle peut effectuer deux essais maximum.
+    # Si PokéAPI renvoie une erreur temporaire (429, 500, 503), le programme attend une seconde avec time.sleep(1) avant de réessayer.
     for tentative in range(max_tentatives):
         try:
             reponse = requests.get(url, timeout=5)
@@ -66,7 +68,7 @@ def obtenir_pokemon_par_type(type_pokemon):
 
     if donnees is None:
         return []
-
+    # Elle parcourt tous les Pokémon retournés par l'API et récupère uniquement leurs noms. exp : Charmelon,charizard...]
     return [
         element["pokemon"]["name"]
         for element in donnees["pokemon"]
@@ -81,7 +83,7 @@ def calculer_moyenne_hp(noms):
 
             if pokemon is None:
                 return None
-
+#boucle parcourant les stats des pokemons, cherche hp et la return
             for statistique in pokemon["stats"]:
                 if statistique["stat"]["name"] == "hp":
                     return statistique["base_stat"]
@@ -90,10 +92,11 @@ def calculer_moyenne_hp(noms):
             return None
 
         return None
-
+#Sans cette instruction, Python récupérerait les HP des Pokémon un par un.; ThreadPoolExecutor en traite plusieurs
     with ThreadPoolExecutor(max_workers=5) as executor:
         resultats = list(executor.map(recuperer_hp, noms))
 
+#Cette ligne conserve uniquement les HP récupérés avec succès.
     valeurs_hp = [
         hp for hp in resultats
         if hp is not None
@@ -101,7 +104,7 @@ def calculer_moyenne_hp(noms):
 
     if not valeurs_hp:
         return None, 0
-
+    #additione tous les HP/le nombre (len)
     moyenne = sum(valeurs_hp) / len(valeurs_hp)
-
+    # la division donne la moyenne et return 2 résultats, ma moyenne arrondie et le nombre de Pokémon analysés 
     return round(moyenne, 2), len(valeurs_hp)
